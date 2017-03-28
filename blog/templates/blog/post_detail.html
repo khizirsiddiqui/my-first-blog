@@ -1,18 +1,144 @@
 {% extends 'blog/base.html' %}
 
+{% load staticfiles %}
+
+{% block x_css %}
+<style type="text/css">
+    label{
+        color: black;
+        font-size: 20px;
+    }
+    .btn-small {
+    height: 24px;
+    line-height: 24px;
+    padding: 0 0.5rem;
+    margin:5px;
+    }
+</style>
+<link href="{% static 'css/font-awesome.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-    <div class="post">
+<div class="row">
+    <div class="card w-100">
+      <div class="card-block">
+        {% if user.is_authenticated %}
         {% if post.published_date %}
-            <div class="date">
+            <div class="card-subtitle mb-2 text-muted">
                 {{ post.published_date }}
             </div>
+        {% else %}
+            {% if user == post.author %}
+            <a class="btn-sm btn-success btn-small" href="{% url 'post_publish' pk=post.pk %}">
+                <span class="fa fa-2x fa-bell"></span> Publish
+            </a>
+            {% endif %}
         {% endif %}
-        {% if user.is_authenticated %}
-        <a class="btn btn-default" href="{% url 'post_edit' pk=post.pk %}">
-        	<span class="glyphicon glyphicon-pencil"></span>
+        {% if user == post.author %}
+        <a class="btn btn-danger float-right btn-small" href="{% url 'post_remove' pk=post.pk %}">
+            <span class="fa fa-remove"></span> Remove
+        </a>
+        <a class="btn btn-warning float-right btn-small" href="{% url 'post_edit' pk=post.pk %}">
+        	<span class="fa fa-pencil"></span> Edit
         </a>
         {% endif %}
-        <h1>{{ post.title }}</h1>
-        <p>{{ post.text|linebreaksbr }}</p>
+        <a href="{% url 'rep_author' pk=post.pk %}">
+        <button class="btn btn-primary btn-small float-right">
+            <span class="fa fa-thumbs-o-up"></span> {{ post.author.reputation }}  Upvote Author
+        </button>
+        </a>
+        <a href="{% url 'post_upvote' pk=post.pk %}">
+        <button class="btn btn-primary btn-small float-right">
+            <span class="fa fa-thumbs-o-up"></span> Upvote Post
+        </button>
+        </a>
+        {% endif %}
+        <h4 class="card-title">
+            {{ post.title }}
+        </h4>
+        <a class="card-subtitle text-muted">
+            <i>
+                {{ post.author.get_full_name }}
+            </i>
+        </a>
+        <hr>
+        <div class="card-text">
+            {{ post.text|safe }}            
+        </div>
+      </div>
     </div>
+</div>
+<hr>
+<div class="row">        
+        {% for comment in post.comments.all %}
+            {% if user.is_authenticated or comment.approved_comment %}
+            
+            <div class="card w-100">
+                <div class="card-block">
+                    <div class="card-title">
+                        <small>
+                            <img src="{% if comment.author.socialaccount_set.all.0.get_avatar_url %}{{ author.socialaccount_set.all.0.get_avatar_url }}{% else %}{% static 'avatars/default.png' %}{% endif %}" class="avatar" alt="user profile image">
+                            <b>{{ comment.author }}</b>
+                            made a comment.
+                        </small>
+                    </div>
+                <div class="card-text"> 
+                        {{ comment.text }}
+                        {% if not comment.approved_comment %}
+                        <span class="text-danger">(Sent for review)</span> 
+                        {% endif %}
+                    <div class="stats float-right">
+                        {% if comment.author == user.get_full_name or post.author == user %}
+                        <a href="{% url 'comment_remove' pk=comment.pk %}">
+                            <button type="button" class="btn btn-primary">
+                                <span class="fa fa-remove"></span> Remove
+                            </button>
+                        </a>
+                        {% endif %}
+                        {% if post.author.username == user.username  %}                                                
+                        {% if not comment.approved_comment %}
+                            <a href="{% url 'comment_approve' pk=comment.pk %}">
+                                <button type="button" class="btn btn-primary">
+                                    <span class="fa fa-plus"></span> Approve
+                                </button>
+                            </a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-text">
+                    <small class="text-muted">{{ comment.created_date }}</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+            <div class="card w-100">
+                <div class="card-block">
+                    <div class="card-title">
+                    {% if user.is_authenticated %}
+                    <form method="POST">{% csrf_token %}
+                        {{ form.non_field_errors }}
+                        {{ form.field_errors }}
+                        {{ form.management_form }}
+                        {{ form.as_table }}
+                        <button type="submit" class="btn btn-success">Send</button>
+                    </form>
+                    {% else %}
+                        <a href="{% url 'user_login' %}">
+                            <button type="button" class="btn btn-primary">Login</button>
+                        </a>
+                        or
+                        <a href="{% url 'user_register' %}">
+                            <button type="button" class="btn btn-primary">Register</button>
+                        </a>
+                        to comment
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+
 {% endblock %}

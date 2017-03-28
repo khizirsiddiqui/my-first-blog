@@ -31,13 +31,28 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'material.theme.amber',
+    'material',
+    'material.frontend',
+    'material.admin',
+
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'blog'
+    'blog',
+
+    'django_gravatar',
+    'avatar',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.windowslive',
 ]
 
 MIDDLEWARE = [
@@ -120,4 +135,59 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-ALLOWED_HOSTS = ['127.0.0.1', '.pythonanywhere.com']
+ALLOWED_HOSTS = ['127.0.0.1', '.pythonanywhere.com', 'localhost']
+
+SSOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+SITE_ID = 2
+
+AUTHENTICATION_BACKENDS = (
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend"
+)
+
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+SOCIALACCOUNT_QUERY_EMAIL = True
+LOGIN_REDIRECT_URL = "/"
+ACCOUNT_AUTHENTICATION_METHOD = 'none'
+ACCOUNT_SIGNUP_PASSWORD_VERIFICATION = True
+ACCOUNT_UNIQUE_EMAIL = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+
+# EMAIL_BACKEND = 'django_mailjet.backends.MailjetBackend'
+# MAILJET_API_KEY = 'd0b567334dee846c3421833986cc655d'
+# MAILJET_API_SECRET = '50450a7e5188f9db6ff105645ccae174'
+# MAILJET_SENDER = 'khizirsiddiqui@gmail.com'
+
+EMAIL_HOST = 'in-v3.mailjet.com'
+EMAIL_HOST_USER = 'd0b567334dee846c3421833986cc655d'
+EMAIL_HOST_PASSWORD = '50450a7e5188f9db6ff105645ccae174'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+MEDIA_ROOT = '/media/'
+MEDIA_URL = '/'
+
+AVATAR_PROVIDERS = (
+    'avatar.providers.PrimaryAvatarProvider',
+    'avatar.providers.GravatarAvatarProvider',
+)
+
+AVATAR_DEFAULT_URL = '/avatars/default.png'
+AVATAR_GRAVATAR_BACKUP = False
+
+GRAVATAR_DEFAULT_IMAGE = 'identicon'

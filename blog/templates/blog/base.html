@@ -1,28 +1,186 @@
+<!DOCTYPE html>
 {% load staticfiles %}
-<html>
-    <head>
-        <title>Khizir's blog</title>
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-        <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" href="{% static 'css/blog.css' %}">
-    </head>
-    <body>
-        <div class="page-header">
-        {% if user.is_authenticated %}
-            <a href="{% url 'post_new' %}" class="top-menu">
-                <span class="glyphicon glyphicon-plus"></span>
-            </a>
-        {% endif %}
-            <h1><a href="/">Khizir's Blog</a></h1>
+{% load i18n %}
+{% load avatar_tags %}
+{% load gravatar %}
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Khizir's Blog</title>
+
+    <link href="{% static 'css/fonts.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style type="text/css">
+	h5.postTitle{
+  		font-family: 'Quicksand';
+	}
+	</style>
+	{% block x_css %}
+    {% endblock %}
+    
+  </head>
+  <body>
+			<nav class="navbar navbar-toggleable-md" role="navigation">
+				<button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				</button>
+				<span class="fa fa-pencil"></span>
+				
+				<div class="navbar-header">
+					<a class="navbar-brand" href="{% url 'post_list' %}">Khizir's Blog</a>
+				</div>
+				
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav mr-auto">
+						{% if user.is_authenticated %}
+							
+							<a class="nav-item nav-link" href="{% url 'post_draft_list' %}">Drafts</a>
+							
+						{% endif %}					
+						
+							<a class="nav-item nav-link">
+								{% now "jS F Y" %}
+							</a>
+						
+					</ul>
+					<ul class="navbar-nav pull-xl-right">
+						<li class="nav-item dropdown" style="margin-right:20px;">
+							 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							 	<img src="{% if user.socialaccount_set.all.0.get_avatar_url %}{{ user.socialaccount_set.all.0.get_avatar_url }}{% else %}{% avatar_url user 34 %}{% endif %}" class="img img-thumbnail" height="34" width="34">
+							 {% if user.is_authenticated %}
+							 	{{user.get_full_name}}
+							 	{% else %}
+							 	Hello
+							 {% endif %}
+							 </a>
+							 <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+								{% if user.is_authenticated %}
+								
+									<a href="{% url 'user_logout' %}" class="dropdown-item">
+										Logout
+									</a>
+									
+									<hr>
+
+									<a href="{% url 'account_update' pk=user.pk %}" class="dropdown-item">
+										Edit Profile
+									</a>
+
+									<a href="{% url 'user_profile' username=user.username %}" class="dropdown-item">
+										See Profile
+									</a>
+									
+									<hr>
+
+							    	<a class="{% block account_nav_email %}{% endblock %} dropdown-item" href="{% url 'account_email' %}">
+							    		E-mail Addresses
+							    	</a>
+						
+							    	<a href="{% url 'account_change_password' %}" class="dropdown-item">
+							    		Change Password
+							    	</a>
+							  	
+							  		{% url 'socialaccount_connections' as connections_url %}
+							  		{% if connections_url %}
+							    		<a href="{{ connections_url }}" class="{% block account_nav_socialaccount_connections %}{% endblock %} dropdown-item">
+							    			Connected Accounts
+							    		</a>
+							  		{% endif %}
+
+							  		<hr>
+							  		
+									<a href="{% url 'post_draft_list' %}" class="dropdown-item">
+										Drafts
+									</a>
+								
+									<a href="{% url 'post_new' %}" class="dropdown-item">
+										Add New Post
+									</a>
+								
+								{% else %}
+								
+									<a href="{% url 'user_login' %}" class="dropdown-item">
+										Login
+									</a>
+								
+									<a href="{% url 'user_register' %}" class="dropdown-item">
+										Register
+									</a>
+								{% endif%}
+							</div>
+						</li>
+					</ul>
+				</div>
+			</nav>
+    <div class="container-fluid">
+	<div class="row">
+		<!--                             NOTIFICATIONS                                    -->
+		<div class="col-md-12">
+			{% if messages %}
+			<div class="notify">
+				<div class="alert alert-info alert-dismissable">
+				  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				  {% for message in messages %}
+					<a>
+						{{ message|safe }}
+					</a>
+				{% endfor %}
+				</div>
+			</div>
+			{% endif %}
+			<!--                            BAR-CONTENT                                       -->
+        	{% block bar_content %}
+            {% endblock %}
         </div>
-        <div class="content container">
-            <div class="row">
-                <div class="col-md-8">
-                {% block content %}
-                {% endblock %}
+	</div>
+			
+			<!--                             SIDEBAR                                      -->
+
+			<div class="row">
+				<div class="col-md-2">
+					<div class="card text-center" style="background-color: #333; border-color: #333;">
+						<div class="card-block">
+							<h3 class="card-title">
+
+								<img src="{% if user.socialaccount_set.all.0.get_avatar_url %}{{ user.socialaccount_set.all.0.get_avatar_url }}{% else %}{% avatar_url user 100 %}{% endif %}" width="100" height="100" class="img rounded-circle" />
+
+								<font color="white">
+									{% if user.is_authenticated %}
+								 		{{user.get_full_name}}
+								 	{% else %}
+								 		Hello
+								 	{% endif %}
+							 	</font>
+							</h3>
+							<p class="card-text">
+								<ul class="list-group">
+								{% for post in recent %}
+									<li class="list-group-item">
+										<a href="{% url 'post_detail' pk=post.pk %}">{{post.title}}</a>
+										 - by {{post.author.get_full_name}}
+									</li>
+								{% endfor %}
+								</ul>
+							</p>
+							
+						</div>
+					</div>
+				</div>
+				<div class="col-md-10">
+                	{% block content %}
+                	<!--                             CONTENT                                      -->
+                	{% endblock %}
                 </div>
-            </div>
-        </div>
-    </body>
+			</div>
+		</div>
+	</div>
+</div>
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/scripts.js' %}"></script>
+  </body>
 </html>

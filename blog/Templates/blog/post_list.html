@@ -1,13 +1,49 @@
 {% extends 'blog/base.html' %}
 
+{% load staticfiles %}
+
+{% block x_css %}
+<link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+<link href="{% static 'css/font-awesome.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block bar_content %}
+{% endblock %}
+
+<!------------------------------------CONTENT------------------------------------>
 {% block content %}
-    {% for post in posts %}
-        <div class="post">
-            <div class="date">
-                {{ post.published_date }}
+{% for post in posts %}
+	<div class="timeline-centered post">
+
+        <article class="timeline-entry">
+
+            <div class="timeline-entry-inner">
+
+                <div class="timeline-icon bg-{% cycle 'primary' 'success' 'secondary' 'info' 'warning' 'danger' %}">
+                    <span class="fa fa-{% cycle 'bell' 'trophy' %}"></span>
+                </div>
+
+                <div class="timeline-label">
+                	
+                    <h5 class="postTitle">
+                    	<a href="{% url 'post_detail' pk=post.pk %}">
+                    		{{ post.title }}
+                    	</a>
+                    </h5>
+                    <div class="date">
+            			<span class="badge badge-default float-right">
+                            <i class="fa fa-eye"></i>Views: {{ post.views }}
+                        </span> 
+                        <span class="badge badge-primary float-right">Upvotes: {{ post.upvotes }}</span> 
+                		{{ post.published_date }}
+                		{{ post.author.get_full_name }}
+            			<span class="badge badge-success float-right">{{ post.approved_comments.count }} Comments</span>
+            		</div>
+                </div>
             </div>
-            <h1><a href="{% url 'post_detail' pk=post.pk %}">{{ post.title }}</a></h1>
-            <p>{{ post.text|linebreaksbr }}</p>
-        </div>
-    {% endfor %}
+
+        </article>
+
+	</div>
+{% endfor %}
 {% endblock %}

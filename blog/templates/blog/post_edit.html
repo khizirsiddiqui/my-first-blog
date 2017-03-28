@@ -1,9 +1,41 @@
 {% extends 'blog/base.html' %}
-
-{% block content %}
-    <h1>New post</h1>
-    <form method="POST" class="post-form">{% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="save btn btn-default">Save</button>
-    </form>
+{% load staticfiles %}
+{% block x_css %}
+<script type="text/javascript" src="{% static "js/tinymce/tinymce.min.js" %}"></script>
+<script type="text/javascript">
+  tinymce.init({
+  selector: 'textarea',
+  height: 500,
+  theme: 'modern',
+  plugins: [
+    'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+    'searchreplace wordcount visualblocks visualchars code fullscreen',
+    'insertdatetime media nonbreaking save table contextmenu directionality',
+    'emoticons template paste textcolor colorpicker textpattern imagetools codesample toc'
+  ],
+  toolbar1: 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+  toolbar2: 'print preview media | forecolor backcolor emoticons | codesample',
+  image_advtab: true,
+  content_css: [
+    '{% static 'css/codepen.min.css' %}',
+  ]
+ });
+</script>
 {% endblock %}
+{% block content %}
+{% if user.is_authenticated %}
+<form class="form-basic" method="post">
+	{% csrf_token %}
+		<div class="form-title-row">
+        	<h1>{% if post.title %}Edit : {{ post.title }}{% else %}New Post{% endif %}</h1>
+      </div>
+           {{ form.as_p }}
+
+            <div class="form-row">
+                <button type="submit">Save</button>
+            </div>
+
+        </form>
+    </div>
+    {% endif %}
+{% endblock %}}
